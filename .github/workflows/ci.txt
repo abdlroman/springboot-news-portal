@@ -24,3 +24,6 @@ jobs:
 
       - name: Run Docker Compose (test)
         run: docker compose up -d
+
+        
+

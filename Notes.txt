@@ -1,0 +1,5 @@
+The Big Picture
+Code → GitHub → Actions → Docker Hub → VPS → Running App
+Each commit triggers a rebuild, pushes a new image, and redeploys automatically.
+That’s the full CI/CD loop you’re aiming for in DevOps.
+
