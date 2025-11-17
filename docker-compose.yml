@@ -1,9 +1,10 @@
 
 services:
   app:
-    build: .
+    image: duls69/newsportal:latest #use the Docker image built and pushed in CI pipeline
+    restart: always
     ports:
-      - "9090:8080"
+      - "9091:8080"
     depends_on:
       - db
     environment:
