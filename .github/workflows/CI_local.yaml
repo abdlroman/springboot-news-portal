@@ -1,0 +1,55 @@
+name: CI Local Build_and_Push_Docker_Image_and_deploy_to_K8s
+
+on:
+  push:
+    branches: [ "test_branch" ]   # Adjust if your default branch is not "main"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: duls69/newsportal:latest_minikube
+
+      - name: Deploy to Minikube via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.MINIKUBE_HOST }}
+          username: ${{ secrets.MINIKUBE_USER }}
+          key: ${{ secrets.MINIKUBE_SSH_KEY }}
+          script: |
+            cd $HOME || exit 1
+
+            if [ ! -d "springboot-news-portal" ]; then
+              git clone https://github.com/duls69/springboot-news-portal.git
+            fi
+
+            cd springboot-news-portal
+            kubectl apply -f k8s/deployment.yaml
+            kubectl apply -f k8s/service.yaml
+            kubectl rollout restart deployment/newsportal-deployment
+            # Step 6c: Apply Kubernetes deployment and service configurations
+            # Restart the deployment to use the new Docker image
+            
