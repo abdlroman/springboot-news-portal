@@ -1,5 +1,4 @@
-name: CI/CD Pipeline   # The name of your workflow, shown in GitHub Actions UI
-
+name: CI Local Build_and_Push_Docker_Image_and_deploy_to_K8s
 on:
   push:
     branches: [ "main" ]   # Trigger workflow whenever code is pushed to the "main" branch
@@ -34,41 +33,25 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
         # Step 4: Authenticate to Docker Hub using GitHub Secrets
         # Secrets store sensitive info securely (username & token)
-
-      - name: Build and Push Docker image
+        - name: Build and Push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .   # Build context is the root of your repo
           push: true   # Push the image to Docker Hub after building
-          tags: duls69/newsportal:latest
+          tags: duls69/newsportal:latest_minikube
         # Step 5: Build Docker image from your project and push to Docker Hub
-        # The image is tagged as "duls69/newsportal:latest"
-
-      - name: Deploy to VPS via SSH
+        # The image is tagged as "duls69/newsportal:latest" 
+        - name: Deploy to Minikube via SSH
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.VPS_HOST }}     # VPS IP/hostname stored in secrets
-          username: ${{ secrets.VPS_USER }} # VPS login user stored in secrets
-          key: ${{ secrets.VPS_SSH_KEY }}   # SSH private key stored in secrets
+          host: ${{ secrets.MINIKUBE_HOST }}     # Minikube IP/hostname stored in secrets
+          username: ${{ secrets.MINIKUBE_USER }} # Minikube login user stored in secrets
+          key: ${{ secrets.MINIKUBE_SSH_KEY }}   # SSH private key stored in secrets
           script: |
             cd $HOME || exit 1
-            # Step 6a: Go to the home directory of the VPS user
+            # Step 6a: Go to the home directory of the Minikube user
             # Exit if $HOME doesn't exist (safety check)
 
             if [ ! -d "springboot-news-portal" ]; then
-              git clone https://github.com/abdlroman/springboot-news-portal.git
-              cd springboot-news-portal
-              # Step 6b: If repo folder doesn't exist, clone it from GitHub
-              # Then move into the cloned folder
-            else
-              cd springboot-news-portal
-              git pull
-              # Step 6c: If repo already exists, go inside and pull latest changes
-            fi
-
-            docker pull duls69/newsportal:latest
-            # Step 7: Pull the latest Docker image from Docker Hub
-
-            docker compose -f docker-compose.yml up -d
-            # Step 8: Use docker-compose.yml to start (or update) containers
-            # "-d" runs in detached mode (background)
+              git clone 
+            
